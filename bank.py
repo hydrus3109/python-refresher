@@ -13,13 +13,11 @@ class bank:
             self.balance = self.balance + money
             return self.balance
         if money < 0:
-            print("can't deposite negative money")
-            return -1
+            raise ValueError("can't deposite negative money")
 
     def withdraw(self, money):
         if money < 0:
-            print("can't withdraw negative money")
-            return -1
+            raise ValueError("can't withdraw negative money")
         elif self.balance - money < 0:
             print("too little money in account")
             return -1
