@@ -1,4 +1,34 @@
-# import numpy as np
+import numpy as np
+
+
+class bank:
+    def __init__(self, balance, name, accountnum):
+        self.balance = balance
+        self.name = name
+        self.accountnum = accountnum
+
+    def deposit(self, money):
+        if money >= 0:
+            self.balance = self.balance + money
+            return self.balance
+        if money < 0:
+            print("can't deposite negative money")
+            return "can't deposite negative money"
+
+    def withdraw(self, money):
+        if money < 0:
+            print("can't withdraw negative money")
+            return "can't withdraw negative money"
+        elif self.balance - money < 0:
+            print("too little money in account")
+            return "too little money in account"
+        else:
+            self.balance = self.balance - money
+            return self.balance
+
+    def printbal(self):
+        print(self.balance)
+        return self.balance
 
 
 def hello():
@@ -39,20 +69,20 @@ def div(a, b):
 #     return np.exp(a)
 
 
-# def sin(a):
-#     return np.sin(a)
+def sin(a):
+    return np.sin(a)
 
 
-# def cos(a):
-#     return np.cos(a)
+def cos(a):
+    return np.cos(a)
 
 
 # def tan(a):
 #     return np.tan(a)
 
 
-# def cot(a):
-#     return 1 / np.tan(a)
+def cot(a):
+    return 1 / np.tan(a)
 
 
 def __main__():

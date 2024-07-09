@@ -1,7 +1,7 @@
 import unittest
 import hello
 
-
+"""
 class TestHello(unittest.TestCase):
     def test_hello(self):
         self.assertEqual(hello.hello(), "Hello, world!")
@@ -21,7 +21,20 @@ class TestHello(unittest.TestCase):
     # def test_cot(self):
     #     self.assertEqual(hello.cot(0), float("inf"))
     #     self.assertEqual(hello.cot(1), 0.6420926159343306)
-
+"""
+class testbank(unittest.TestCase):
+    def test_deposit(self):
+        bank = hello.bank(10, 'aidan',123)
+        self.assertEqual(bank.deposit(10), 20)
+        self.assertEqual(bank.deposit(-5), 'can\'t deposite negative money')
+    def test_withdraW(self):
+        bank = hello.bank(10, 'aidan',123)
+        self.assertEqual(bank.withdraw(-5), 'can\'t withdraw negative money')
+        self.assertEqual(bank.withdraw(1000), 'too little money in account')
+        self.assertEqual(bank.withdraw(3),7)
+    def test_bal(self):
+        bank = hello.bank(10, 'aidan',123)
+        self.assertEqual(bank.printbal(), 10)
 
 if __name__ == "__main__":
     unittest.main()
