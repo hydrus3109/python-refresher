@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 
-class testbank(unittest.TestCase):
+class testphysics(unittest.TestCase):
     def test_calc_weight(self):
         self.assertAlmostEqual(physics.calc_weight(0), 0)
         self.assertAlmostEqual(physics.calc_weight(1), 9.81)
@@ -25,7 +25,7 @@ class testbank(unittest.TestCase):
         with self.assertRaises(ValueError):
             physics.will_float(0, 1)
         self.assertTrue(physics.will_float(1, 1))
-        self.assertFalse(physics.will_float(0.1, 100))
+        self.assertFalse(physics.will_float(0.1, 1000))
         self.assertTrue(physics.will_float(1000, 1000))
 
     def test_calc_pressure(self):
@@ -36,17 +36,21 @@ class testbank(unittest.TestCase):
     def test_calc_accel(self):
         self.assertAlmostEqual(physics.calc_accel(0, 1), 0)
         self.assertAlmostEqual(physics.calc_accel(10, 2), 5)
-        self.assertRaises(ZeroDivisionError, physics.calc_accel(10, 0))
+        with self.assertRaises(ZeroDivisionError):
+            physics.calc_accel(1, 0)
 
     def test_calc_ang_accel(self):
         self.assertAlmostEqual(physics.calc_ang_accel(0, 1), 0)
         self.assertAlmostEqual(physics.calc_ang_accel(10, 2), 5)
-        self.assertRaises(ZeroDivisionError, physics.calc_ang_accel(10, 0))
+        with self.assertRaises(ZeroDivisionError):
+            physics.calc_ang_accel(10, 0)
 
     def test_calc_torque(self):
         self.assertAlmostEqual(physics.calc_torque(0, 0, 1), 0)
-        self.assertAlmostEqual(physics.calc_torque(10, 0, 1), 10)
-        self.assertAlmostEqual(physics.calc_torque(10, math.pi / 2, 1), 0)
+        self.assertAlmostEqual(physics.calc_torque(10, 0, 1), 0)
+        self.assertAlmostEqual(physics.calc_torque(10, math.pi / 2, 1), 10)
+        with self.assertRaises(ValueError):
+            physics.calc_torque(10, 10, 0)
 
     def test_calculate_mom_inertia(self):
         self.assertAlmostEqual(physics.calculate_mom_inertia(0, 1), 0)
@@ -70,11 +74,29 @@ class testbank(unittest.TestCase):
         self.assertAlmostEqual(physics.calculate_auv_ang_accel(10, math.pi / 2), 5)
 
     def test_calc_auv2_accel(self):
-        T = np.array([1, 1, 1, 1])
+        T = np.array([1, 0, 0, 1])
         alpha = math.pi / 4
         theta = 0
-        np.testing.assert_array_almost_equal(
-            physics.calc_auv2_accel(T, alpha, theta), np.array([0, 0])
+        np.testing.assert_array_equal(
+            physics.calc_auv2_accel(T * 0, alpha, theta), np.array([0, 0])
+        )
+        print(physics.calc_auv2_accel(T, alpha + 100, theta + 123))
+        np.testing.assert_equal(
+            np.any(
+                np.not_equal(
+                    physics.calc_auv2_accel(T, alpha + 100, theta + 123),
+                    np.array([0, 0]),
+                )
+            ),
+            True,
+        )
+        np.testing.assert_equal(
+            physics.calc_auv2_accel(T * 3, alpha + math.pi / 4, theta),
+            np.array([0, 0.06]),
+        )
+        np.testing.assert_almost_equal(
+            physics.calc_auv2_accel(T * 3, alpha + math.pi / 4, theta + math.pi / 2),
+            np.array([-0.06, 0]),
         )
 
     def test_calc_auv2_ang_accel(self):
@@ -82,9 +104,10 @@ class testbank(unittest.TestCase):
         alpha = math.pi / 4
         L = 1
         l = 1
+        T1 = np.array([1,0,0,0])
         self.assertAlmostEqual(physics.calc_auv2_ang_accel(T, alpha, L, l), 0)
-
-    # def test_sim(self):
+        self.assertEqual(physics.calc_auv2_ang_accel(T,alpha,L,l), 1)
+        self.assertNotEqual(physics.calc_auv2_ang_accel(T, alpha + math.pi/2, 10, 23), 1)
 
 
 if __name__ == "__main__":
