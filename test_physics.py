@@ -1,38 +1,90 @@
 import unittest
 import physics
+import math
+import numpy as np
 
 
 class testbank(unittest.TestCase):
-    def test_buoyancy(self):
-        self.assertRaises(physics.calc_buoyancy(0, 1), ValueError)
-        self.assertAlmostEqual(physics.calc_buoyancy(10, 10), 9810)
-        self.assertAlmostEqual(physics.calc_buoyancy(1, 1), 9.81)
-        self.assertRaises(physics.calc_buoyancy(0, 1), ValueError)
+    def test_calc_weight(self):
+        self.assertAlmostEqual(physics.calc_weight(0), 0)
+        self.assertAlmostEqual(physics.calc_weight(1), 9.81)
+        self.assertAlmostEqual(physics.calc_weight(-1), -9.81)
+        self.assertAlmostEqual(physics.calc_weight(1000), 9810)
 
-    def test_float(self):
-        self.assertRaises(physics.will_float(0, 0), ValueError)
-        self.assertEqual(physics.will_float(1000, 1), True)
+    def test_calc_buoyancy(self):
+        with self.assertRaises(ValueError):
+            physics.calc_buoyancy(0, 1000)
+        with self.assertRaises(ValueError):
+            physics.calc_buoyancy(1000, 0)
+        # self.assertRaises( physics.calc_buoyancy(0, 1000),ValueError)
+        # self.assertRaises( physics.calc_buoyancy(1000, 0), ValueError)
+        self.assertAlmostEqual(physics.calc_buoyancy(1, 1000), 9810)
+        self.assertAlmostEqual(physics.calc_buoyancy(0.5, 500), 2452.5)
 
-    def test(self):
-        self.assertEqual
+    def test_will_float(self):
+        with self.assertRaises(ValueError):
+            physics.will_float(0, 1)
+        self.assertTrue(physics.will_float(1, 1))
+        self.assertFalse(physics.will_float(0.1, 100))
+        self.assertTrue(physics.will_float(1000, 1000))
 
-    def test_deposit(self):
-        bank1 = bank.bank("aidan", 123)
-        bank1.deposit(10)
-        self.assertEqual(bank1.deposit(10), 20)
-        self.assertRaises(bank1.deposit(-5), ValueError)
+    def test_calc_pressure(self):
+        self.assertAlmostEqual(physics.calc_pressure(0), 0)
+        self.assertAlmostEqual(physics.calc_pressure(10), 98100)
+        self.assertAlmostEqual(physics.calc_pressure(100), 981000)
 
-    def test_withdraW(self):
-        bank1 = bank.bank("aidan", 123)
-        bank1.deposit(10)
-        self.assertRaises(bank1.withdraw(-5), ValueError)
-        self.assertEqual(bank1.withdraw(1000), -1)
-        self.assertEqual(bank1.withdraw(3), 7)
+    def test_calc_accel(self):
+        self.assertAlmostEqual(physics.calc_accel(0, 1), 0)
+        self.assertAlmostEqual(physics.calc_accel(10, 2), 5)
+        self.assertRaises(ZeroDivisionError, physics.calc_accel(10, 0))
 
-    def test_bal(self):
-        bank1 = bank.bank("aidan", 123)
-        bank1.deposit(10)
-        self.assertEqual(bank1.printbal(), 10)
+    def test_calc_ang_accel(self):
+        self.assertAlmostEqual(physics.calc_ang_accel(0, 1), 0)
+        self.assertAlmostEqual(physics.calc_ang_accel(10, 2), 5)
+        self.assertRaises(ZeroDivisionError, physics.calc_ang_accel(10, 0))
+
+    def test_calc_torque(self):
+        self.assertAlmostEqual(physics.calc_torque(0, 0, 1), 0)
+        self.assertAlmostEqual(physics.calc_torque(10, 0, 1), 10)
+        self.assertAlmostEqual(physics.calc_torque(10, math.pi / 2, 1), 0)
+
+    def test_calculate_mom_inertia(self):
+        self.assertAlmostEqual(physics.calculate_mom_inertia(0, 1), 0)
+        self.assertAlmostEqual(physics.calculate_mom_inertia(1, 0), 0)
+        self.assertAlmostEqual(physics.calculate_mom_inertia(2, 3), 18)
+
+    def test_calculate_auv_accel(self):
+        np.testing.assert_array_almost_equal(
+            physics.calculate_auv_accel(0, 0), np.array([0, 0])
+        )
+        np.testing.assert_array_almost_equal(
+            physics.calculate_auv_accel(10, 0), np.array([0.1, 0])
+        )
+        np.testing.assert_array_almost_equal(
+            physics.calculate_auv_accel(10, math.pi / 2), np.array([0, 0.1])
+        )
+
+    def test_calculate_auv_ang_accel(self):
+        self.assertAlmostEqual(physics.calculate_auv_ang_accel(0, 0), 0)
+        self.assertAlmostEqual(physics.calculate_auv_ang_accel(10, 0), 0)
+        self.assertAlmostEqual(physics.calculate_auv_ang_accel(10, math.pi / 2), 5)
+
+    def test_calc_auv2_accel(self):
+        T = np.array([1, 1, 1, 1])
+        alpha = math.pi / 4
+        theta = 0
+        np.testing.assert_array_almost_equal(
+            physics.calc_auv2_accel(T, alpha, theta), np.array([0, 0])
+        )
+
+    def test_calc_auv2_ang_accel(self):
+        T = np.array([1, 1, 1, 1])
+        alpha = math.pi / 4
+        L = 1
+        l = 1
+        self.assertAlmostEqual(physics.calc_auv2_ang_accel(T, alpha, L, l), 0)
+
+    # def test_sim(self):
 
 
 if __name__ == "__main__":

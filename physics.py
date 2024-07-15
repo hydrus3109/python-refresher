@@ -1,63 +1,117 @@
 import numpy as np
 import math
+
+
 def calc_weight(mass):
-    '''utility func that calculates F_g from mass in kg on earth'''
-    return 9.81*mass
+    """utility func that calculates F_g from mass in kg on earth"""
+    return 9.81 * mass
+
+
 def calc_buoyancy(V, density):
-    '''calculates density when given volume in cubic meters
-      and density in kg/m^3, using earths g constant'''
-    if(V == 0):
+    """calculates density when given volume in cubic meters
+    and density in kg/m^3, using earths g constant"""
+    if V <= 0:
         raise ValueError("can't have no volume")
-    if(density == 0):
+    if density <= 0:
         raise ValueError("can't have 0 density")
-    return V*density*9.81
+    return V * density * 9.81
+
+
 def will_float(V, mass):
-    '''calculates if an object will float given mass in 
-    kg and volume in m^3'''
-    if(V == 0):
+    """calculates if an object will float given mass in
+    kg and volume in m^3"""
+    if V == 0:
         raise ValueError("can't have no volume")
-    if(calc_buoyancy(V,1000) >= calc_weight(mass)):
+    if calc_buoyancy(V, 1000) >= calc_weight(mass):
         return True
     return False
+
+
 def calc_pressure(depth):
-    '''calculates pressure in water on earth given depth in meters, returning in pascals.'''
-    return depth*9.81*1000
+    """calculates pressure in water on earth given depth in meters, returning in pascals."""
+    return depth * 9.81 * 1000
+
+
 def calc_accel(force, mass):
-    '''calculates acceleration in m/s^2 give force in N and mass in kg'''
-    return force/mass
+    """calculates acceleration in m/s^2 give force in N and mass in kg"""
+    return force / mass
+
+
 def calc_ang_accel(tau, I):
-    '''calculates angular acceleration given torque in Nm and moment of inertia in kg*m^2'''
-    return tau/I
+    """calculates angular acceleration given torque in Nm and moment of inertia in kg*m^2"""
+    return tau / I
+
+
 def calc_torque(Fmag, Fdir, r):
-    ''' calculates a torque given its magnitude, direction, and distance from axis of rotation.'''
-    return r*Fmag*math.cos(Fdir)
+    """calculates a torque given its magnitude, direction, and distance from axis of rotation."""
+    return r * Fmag * math.sin(Fdir)
+
+
 def calculate_mom_inertia(m, r):
-    '''calculates moment of inertia given the mass of an object and the distance from axis of rotation'''
-    return m*r*r
-def calculate_auv_accel(Fmag, Fdir, mass = 100, volume = 0.1, thruster_dist = 0.5):
-    '''given a force and its angle, with option to change mass, volume, and thruster distance, returns the translation acceleration of the vehicle in a 2d vector format.'''
-    F_vertical = Fmag*math.sin(Fdir)
-    F_horizontal = Fmag*math.cos(Fdir)
-    return np.array([F_horizontal, F_vertical])/mass
-def calculate_auv_ang_accel(Fmag, Fdir, interia = 1, thruster_dist = 0.5):
-    '''given a force and its angle, with option to change interia and thruster distance, returns the rotational acceleration of the vehicle.'''
-    return Fmag*math.sin(Fdir)*thruster_dist/interia
-def calc_auv2_accel(T, alpha, theta, mass = 100):
-    Thorz = T*math.sin(alpha)
-    Tvert = T*math.cos(alpha)
-    tothorizontal = Thorz[0]-Thorz[1]+Thorz[2]-Thorz[3]
+    """calculates moment of inertia given the mass of an object and the distance from axis of rotation"""
+    return m * r * r
+
+
+def calculate_auv_accel(Fmag, Fdir, mass=100, volume=0.1, thruster_dist=0.5):
+    """given a force and its angle, with option to change mass, volume, and thruster distance, returns the translation acceleration of the vehicle in a 2d vector format."""
+    F_vertical = Fmag * math.sin(Fdir)
+    F_horizontal = Fmag * math.cos(Fdir)
+    return np.array([F_horizontal, F_vertical]) / mass
+
+
+def calculate_auv_ang_accel(Fmag, Fdir, interia=1, thruster_dist=0.5):
+    """given a force and its angle, with option to change interia and thruster distance, returns the rotational acceleration of the vehicle."""
+    return Fmag * math.sin(Fdir) * thruster_dist / interia
+
+
+def calc_auv2_accel(T, alpha, theta, mass=100):
+    Thorz = T * math.sin(alpha)
+    Tvert = T * math.cos(alpha)
+    tothorizontal = Thorz[0] - Thorz[1] + Thorz[2] - Thorz[3]
     totvertical = Tvert[:2] - Tvert[2:]
     accel = np.array([tothorizontal, totvertical])
-    rotate = np.array([[math.cos(theta), -math.sin(theta)],[math.sin(theta), math.cos(theta)]])
-    return np.dot(rotate, accel)/mass
-def calc_auv2_ang_accel(T, alpha, L, l, interia = 100):
-    Thorz = T*math.sin(alpha)
-    Tvert = T*math.cos(alpha)
-    torques = l*Thorz + L*Tvert
-    return torques[0]-torques[1]+torques[2]-torques[3]
-def sim_auv_motion(T,alpha,L,lmass,inertia,dt,t_final, x0,y0):
-    count = 0
+    rotate = np.array(
+        [[math.cos(theta), -math.sin(theta)], [math.sin(theta), math.cos(theta)]]
+    )
+    return np.dot(rotate, accel) / mass
 
+
+def calc_auv2_ang_accel(T, alpha, L, l, interia=100):
+    Thorz = T * math.sin(alpha)
+    Tvert = T * math.cos(alpha)
+    torques = l * Thorz + L * Tvert
+    return torques[0] - torques[1] + torques[2] - torques[3]
+
+
+def sim_auv_motion(
+    T, alpha, L, l, lmass, inertia, dt=0.1, t_final=10, x0=0, y0=0, theta=0
+):
+    count = 0
+    curang = theta
+    timestamps = np.array([0])
+    x = np.array([x0])
+    y = np.array([y0])
+    theta = np.array([theta])
+    v = np.array([0, 0])
+    omega = np.array([0])
+    a = np.array([0, 0])
     while count <= t_final:
+        count += dt
+        timestamps.append(count)
+        accel = calc_auv2_accel(T, alpha, curang)
+        a.append(accel)
+        angaccel = calc_auv2_ang_accel(T, alpha, L, l, inertia)
+        newv = v[-1] + accel * dt
+        newomega = omega[-1] + angaccel * dt
+        v.append(newv)
+        omega.append(newomega)
+        newtheta = theta[-1] * dt + 0.5 * angaccel * dt * dt
+        theta.append(newtheta)
+        newcoords = np.array([x[-1], y[-1]]) * dt + 0.5 * accel * dt * dt
+        x.append(newcoords[0])
+        y.append(newcoords[1])
+    return timestamps, x, y, theta, v, omega, a
+
 
 if __name__ == "__main__":
+    print("hello")
