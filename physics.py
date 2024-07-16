@@ -132,8 +132,7 @@ def sim_auv_motion(
 
 
 if __name__ == "__main__":
-    T = np.array([1, 0, 1, 0])
-    alpha = 0
-    L = 4
-    l = 3
-    print(calc_auv2_ang_accel(T, alpha, L, l))
+    T = np.array([10, 0, 10, 0])
+    alpha = math.pi / 2
+    theta = math.pi / 2
+    print(calc_auv2_accel(T, alpha, theta))
